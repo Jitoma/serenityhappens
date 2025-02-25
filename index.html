@@ -17,19 +17,30 @@
 
     <script>
         const shopId = "50353"; // Replace with your actual Spreadshirt shop ID
-        const apiUrl = `https://api.spreadshirt.net/api/v1/shops/${50353}/designs`;
+        const apiKey = "YOUR_NEW_API_KEY"; // Replace with your new API key
+        const apiUrl = `https://api.spreadshirt.net/api/v1/shops/${shopId}/designs`;
 
         async function fetchDesigns() {
             try {
-                const response = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `SprdAuth apiKey="${apiKey}"`
+                    }
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch designs");
+
                 const data = await response.json();
                 const designsContainer = document.getElementById("designs");
 
                 data.designs.forEach(design => {
+                    const imageUrl = design.resources && design.resources[0] ? design.resources[0].href : 'default-image.jpg';
+
                     const designElement = document.createElement("div");
                     designElement.className = "design-card";
                     designElement.innerHTML = `
-                        <img src="${design.resources[0].href}" alt="${design.name}">
+                        <img src="${imageUrl}" alt="${design.name}">
                         <h2>${design.name}</h2>
                         <a href="design.html?id=${design.id}">View Products</a>
                     `;
