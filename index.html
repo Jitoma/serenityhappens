@@ -3,55 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Spreadshirt Designs</title>
+    <title>Design Products</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
-        .design-card { border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-        .design-card img { max-width: 100%; height: auto; }
+        .product-card { border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+        .product-card img { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
-    <h1>Serenity Happens Recovery Gifts</h1>
-    <div id="designs" class="grid"></div>
+    <h1>Products with This Design</h1>
+    <div id="products" class="grid"></div>
+    <a href="index.html">Back to Designs</a>
 
     <script>
-        const shopId = "50353"; // Replace with your actual Spreadshirt shop ID
-        const apiKey = "YOUR_NEW_API_KEY"; // Replace with your new API key
-        const apiUrl = `https://api.spreadshirt.net/api/v1/shops/${shopId}/designs`;
+        const shopId = "YOUR_SHOP_ID"; // Replace with your actual Spreadshirt shop ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const designId = urlParams.get("id");
 
-        async function fetchDesigns() {
-            try {
-                const response = await fetch(apiUrl, {
-                    headers: {
-                        "Accept": "application/json",
-                        "Authorization": `SprdAuth apiKey="${apiKey}"`
-                    }
-                });
+        if (!designId) {
+            document.body.innerHTML = "<h2>Error: No design selected.</h2>";
+        } else {
+            const apiUrl = `https://api.spreadshirt.net/api/v1/shops/${shopId}/products?query=designIds=${designId}`;
 
-                if (!response.ok) throw new Error("Failed to fetch designs");
+            async function fetchProducts() {
+                try {
+                    const response = await fetch(apiUrl, { headers: { "Accept": "application/json" } });
+                    const data = await response.json();
+                    const productsContainer = document.getElementById("products");
 
-                const data = await response.json();
-                const designsContainer = document.getElementById("designs");
-
-                data.designs.forEach(design => {
-                    const imageUrl = design.resources && design.resources[0] ? design.resources[0].href : 'default-image.jpg';
-
-                    const designElement = document.createElement("div");
-                    designElement.className = "design-card";
-                    designElement.innerHTML = `
-                        <img src="${imageUrl}" alt="${design.name}">
-                        <h2>${design.name}</h2>
-                        <a href="design.html?id=${design.id}">View Products</a>
-                    `;
-                    designsContainer.appendChild(designElement);
-                });
-            } catch (error) {
-                console.error("Error fetching designs:", error);
+                    data.products.forEach(product => {
+                        const productElement = document.createElement("div");
+                        productElement.className = "product-card";
+                        productElement.innerHTML = `
+                            <img src="${product.resources[0].href}" alt="${product.name}">
+                            <h2>${product.name}</h2>
+                            <a href="https://www.spreadshirt.com/shop/product/${product.id}/" target="_blank">View on Spreadshirt</a>
+                        `;
+                        productsContainer.appendChild(productElement);
+                    });
+                } catch (error) {
+                    console.error("Error fetching products:", error);
+                }
             }
-        }
 
-        fetchDesigns();
+            fetchProducts();
+        }
     </script>
 </body>
 </html>
